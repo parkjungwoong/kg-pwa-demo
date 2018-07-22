@@ -367,4 +367,41 @@
              .register('./service-worker.js')
              .then(function() { console.log('Service Worker Registered'); });
   }
+
+
+  //var pushButton = document.querySelector('.js-push-button');
+  var pushButton = document.getElementById('js-push-button');
+  pushButton.addEventListener('click', subscribe);
+
+  function subscribe() {
+    // Disable the button so it can't be changed while  
+    // we process the permission request  
+    pushButton.disabled = true;
+
+    navigator.serviceWorker.ready.then(function(serviceWorkerRegistration) {
+      serviceWorkerRegistration.pushManager.subscribe({ userVisibleOnly: true })
+        .then(function(subscription) {
+          //TODO 여기서 구독 정보를 받아서 서버로 전송함 토큰값 같은것들 ...
+        })
+        .catch(function(e) {
+          if(Notification.permission === 'denied') {
+            // The user denied the notification permission which  
+            // means we failed to subscribe and the user will need  
+            // to manually change the notification permission to  
+            // subscribe to push messages  
+            console.warn('Permission for Notifications was denied');
+            pushButton.disabled = true;
+          } else {
+            // A problem occurred with the subscription; common reasons  
+            // include network errors, and lacking gcm_sender_id and/or  
+            // gcm_user_visible_only in the manifest.  
+            console.error('Unable to subscribe to push.', e);
+            pushButton.disabled = false;
+            pushButton.textContent = 'Enable Push Messages';
+          }
+        });
+    });
+  }
+
+
 })();
